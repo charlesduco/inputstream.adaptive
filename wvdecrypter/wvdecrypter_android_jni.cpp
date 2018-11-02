@@ -451,7 +451,7 @@ void WV_CencSingleSampleDecrypter::GetCapabilities(const uint8_t *keyid, uint32_
 
 bool WV_CencSingleSampleDecrypter::ProvisionRequest()
 {
-  Log(SSD_HOST::LL_ERROR, "PrivisionData request: drm:%p" , media_drm_.GetMediaDrm());
+  Log(SSD_HOST::LL_DEBUG, "PrivisionData request: drm:%p" , media_drm_.GetMediaDrm());
 
   jni::CJNIMediaDrmProvisionRequest request = media_drm_.GetMediaDrm()->getProvisionRequest();
   if (xbmc_jnienv()->ExceptionCheck())
@@ -504,8 +504,12 @@ bool WV_CencSingleSampleDecrypter::KeyUpdateRequest(bool waitKeys)
 {
   keyUpdateRequested = false;
 
+  Log(SSD_HOST::LL_DEBUG, "KeyUpdateRequest 1: exception:%d provision:%d", (int)xbmc_jnienv()->ExceptionCheck(), provisionRequested);
+
   jni::CJNIMediaDrmKeyRequest keyRequest = media_drm_.GetMediaDrm()->getKeyRequest(session_id_, pssh_,
     "video/mp4", jni::CJNIMediaDrm::KEY_TYPE_STREAMING, optParams_);
+
+  Log(SSD_HOST::LL_DEBUG, "KeyUpdateRequest 2: exception:%d provision:%d", (int)xbmc_jnienv()->ExceptionCheck(), provisionRequested);
 
   if (xbmc_jnienv()->ExceptionCheck())
   {
@@ -529,6 +533,8 @@ bool WV_CencSingleSampleDecrypter::KeyUpdateRequest(bool waitKeys)
 
   if (!SendSessionMessage(keyRequestData))
     return false;
+
+  Log(SSD_HOST::LL_DEBUG, "KeyUpdateRequest 3: exception:%d provision:%d", (int)xbmc_jnienv()->ExceptionCheck(), provisionRequested);
 
   if (waitKeys && keyRequestData.size() == 2) // Service Certificate call
   {
@@ -1066,7 +1072,7 @@ public:
 
   virtual const char *SelectKeySytem(const char* keySystem) override
   {
-    Log(SSD_HOST::LL_ERROR, "Key system request: %s", keySystem);
+    Log(SSD_HOST::LL_DEBUG, "Key system request: %s", keySystem);
     if (strcmp(keySystem, "com.widevine.alpha") == 0)
     {
       key_system_ = WIDEVINE;
